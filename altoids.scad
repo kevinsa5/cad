@@ -13,7 +13,7 @@ module bottom(){
     difference(){
         rounded_box(dims, radii);
         translate(wall_thickness * [1,1,1]){
-            rounded_box(dims - [2*wall_thickness, 2*wall_thickness, 0], radii);
+            rounded_box(dims - [2*wall_thickness, 2*wall_thickness, wall_thickness-epsilon], radii);
         }
         // holes for the hinges
         //0.6 high
@@ -24,11 +24,59 @@ module bottom(){
             cube([1.0, wall_thickness + 4*epsilon, 0.6]);
     }
     
+    // hinges, same measurements as the hinge holes:
     translate([2.0, -wall_thickness, dims[2] - 0.8])
         hinge();
     translate([dims[0] - 3.0, -wall_thickness, dims[2] - 0.8])
         hinge();
-
+    
+    // rim around the upper edge:
+    //straights:
+    translate([1, 2*wall_thickness + epsilon, dims[2] - 2*wall_thickness])
+        rotate([0,90,0])
+            cylinder(r = 0.1, h = dims[0] - 2, $fn = 50);
+    translate([1, dims[1] - 2*wall_thickness - epsilon, dims[2] - 2*wall_thickness])
+        rotate([0,90,0])
+            cylinder(r = 0.1, h = dims[0] - 2, $fn = 50);
+    translate([2*wall_thickness+epsilon, 1, dims[2] - 2*wall_thickness])
+        rotate([0,90,90])
+            cylinder(r = 0.1, h = dims[1] - 2, $fn = 50);
+    translate([dims[0] - 2*wall_thickness-epsilon, 1, dims[2] - 2*wall_thickness])
+        rotate([0,90,90])
+            cylinder(r = 0.1, h = dims[1] - 2, $fn = 50);
+    //curves:
+    translate(dims - [1,1,0] - 2*wall_thickness*[0,0,1] - 1* epsilon * [1,1,0]){
+        intersection(){
+            arc90();
+            translate([0,0,-0.5]) cube([1,1,1]);
+        }
+    }
+    translate([dims[0], 2+wall_thickness-3*epsilon, dims[2]] - [1,1,0] - 2*wall_thickness*[0,0,1] - 1* epsilon * [1,1,0]){
+        rotate([180,0,0]){
+            intersection(){
+                arc90();
+                translate([0,0,-0.5]) cube([1,1,1]);
+            }
+        }
+    }
+    translate([1+epsilon,1+epsilon,dims[2] - 2*wall_thickness]){
+        rotate([0,0,180]){
+            intersection(){
+                arc90();
+                translate([0,0,-0.5]) cube([1,1,1]);
+            }
+        }
+    }
+    translate([1+epsilon,dims[1]-1-epsilon,dims[2] - 2*wall_thickness]){
+        rotate([0,0,90]){
+            intersection(){
+                arc90();
+                translate([0,0,-0.5]) cube([1,1,1]);
+            }
+        }
+    }
+    
+    // bumps:
     // 1.6 is the height off the ground
     // 2.0 is the distance from the bump to the edge
     translate([2.0, dims[1]-2*epsilon, 1.6])
@@ -39,6 +87,12 @@ module bottom(){
         rotate([-90,0,0])
             bump();
     
+}
+
+module arc90(){
+    rotate_extrude(angle = 360, concavity = 10, $fn = 100){
+        translate([1-0.1,0,0]) circle(r = 0.1, $fn = 50);
+    }
 }
 
 module rounded_box(dims, radii){
